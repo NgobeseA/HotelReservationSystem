@@ -1,0 +1,83 @@
+############################
+# .NET / C# Build Artifacts
+############################
+bin/
+obj/
+out/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+*.vspscc
+*.user
+*.suo
+*.csproj.user
+*.dbmdl
+*.jfm
+*.ipch
+_ReSharper*/
+*.ncb
+*.opendb
+*.VC.db
+*.vscode
+*.bak
+*.Backup
+*.swp
+
+############################
+# Entity Framework
+############################
+Migrations/
+*.sqlite
+*.db
+*.mdf
+*.ldf
+
+############################
+# Configuration / Secrets
+############################
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+############################
+# Visual Studio / Rider / VS Code
+############################
+.vs/
+.idea/
+*.DotSettings
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+############################
+# Node / Angular
+############################
+node_modules/
+dist/
+tmp/
+temp/
+*.tgz
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.pnp/
+.pnp.js
+
+############################
+# OS Files
+############################
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+############################
+# Logs
+############################
+*.log
+logs/
