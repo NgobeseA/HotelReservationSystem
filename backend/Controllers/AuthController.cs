@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;  // Added for ILogger
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,14 +15,17 @@ namespace HotelReservationSystem.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthController> _logger;  // Inject ILogger
 
         public AuthController(UserManager<IdentityUser> userManager,
                                SignInManager<IdentityUser> signInManager,
-                               IConfiguration configuration)
+                               IConfiguration configuration,
+                               ILogger<AuthController> logger)   // Receive ILogger
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -39,13 +43,24 @@ namespace HotelReservationSystem.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
+            _logger.LogInformation("Login attempt for user: {Email}", model.Email);
+
             var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null) return Unauthorized();
+            if (user == null)
+            {
+                _logger.LogWarning("Login failed: user not found for email {Email}", model.Email);
+                return Unauthorized();
+            }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-            if (!result.Succeeded) return Unauthorized();
+            if (!result.Succeeded)
+            {
+                _logger.LogWarning("Login failed: invalid password for user {Email}", model.Email);
+                return Unauthorized();
+            }
 
             var token = GenerateJwtToken(user);
+            _logger.LogInformation("User {Email} logged in successfully", model.Email);
             return Ok(new { token });
         }
 
@@ -53,12 +68,12 @@ namespace HotelReservationSystem.Controllers
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email ?? ""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id)
+                new Claim(ClaimTypes.NameIdentifier, user.Id ?? "")
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? ""));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
@@ -75,13 +90,13 @@ namespace HotelReservationSystem.Controllers
 
     public class RegisterModel
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 
     public class LoginModel
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }
