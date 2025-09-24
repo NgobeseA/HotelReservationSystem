@@ -13,10 +13,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes), 
     provideClientHydration(withEventReplay()),
     provideAnimations(),
-    providePrimeNG({
-      theme: {
-        preset: Aura
-      }
-    })
+    providePrimeNG()
   ]
 };
